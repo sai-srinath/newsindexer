@@ -48,14 +48,16 @@ public class Parser {
 		// to store the result sent from the regexAuthor method and regexPlaceDate method
 		Object[] resultAuthor = {null, null, null};
 		Object[] resultPlaceDate = {null, null, null};
-		
+		StringBuilder news = new StringBuilder();
 		
 		// Next 4 lines contains the code to get the fileID and Category metadata
 		String[] fileCat = new String[2];
 		
 		fileCat = regexFileIDCat("/((?:[a-z]|-)+)/([0-9]{7})", filename);
+		// System.out.println(filename);
 		// throw an exception if the file is blank, junk or null
 		if (fileCat[0] == null){
+			System.out.println(filename);
 			throw new ParserException();
 		}
 		d.setField(FieldNames.CATEGORY, fileCat[0]);
@@ -95,7 +97,7 @@ public class Parser {
 			//d.setField(FieldNames.TITLE, newscollated.get(0));
 			
 			// Appending the lines into one big string using StringBuilder
-			StringBuilder news = new StringBuilder();
+			
 			for (String n: newscollated)
 			{
 				news.append(n);
@@ -107,7 +109,7 @@ public class Parser {
 			
 			titleInfo = regexTITLE("([^a-z]+)\\s{2,}", news.toString());
 			d.setField(FieldNames.TITLE, titleInfo[0].toString().trim());
-			indexPos = (int) titleInfo[1];
+			indexPos = (Integer) titleInfo[1];
 			
 			
 			
@@ -130,15 +132,15 @@ public class Parser {
 		    
 		    
 		    
-		    if ((int) resultAuthor[2] != 0)
+		    if ((Integer) resultAuthor[2] != 0)
 		    {
-		    	indexPos = (int) resultAuthor[2];
+		    	indexPos = (Integer) resultAuthor[2];
 		    }
 			
 		    
 		    
 		    // Getting the Place and Date
- 			resultPlaceDate = regexPlaceDate("\\s{2,}(.+),\\s([A-Z][a-z]+\\s[0-9]{1,})", news.toString());
+ 			resultPlaceDate = regexPlaceDate("\\s{2,}(.+),\\s(?:([A-Z][a-z]+\\s[0-9]{1,})\\s{1,}-)", news.toString());
  			
  			if (resultPlaceDate[0] != null)
  			{
@@ -152,13 +154,13 @@ public class Parser {
  			
  		    // getting the content
  		    
- 		    if ((int) resultPlaceDate[2] != 0)
+ 		    if ((Integer) resultPlaceDate[2] != 0)
 		    {
-		    	indexPos = (int) resultPlaceDate[2];
+		    	indexPos = (Integer) resultPlaceDate[2];
 		    }
  		    
  		    
- 		    d.setField(FieldNames.CONTENT, news.substring(indexPos + 3));
+ 		    d.setField(FieldNames.CONTENT, news.substring(indexPos + 1));
  		    
  		    return d;
  		    
@@ -178,6 +180,14 @@ public class Parser {
 			throw new ParserException();
 		}
 		
+		catch(Exception e){
+			System.out.println(indexPos);
+			System.out.println(news.toString());
+			System.out.println(filename);
+			e.printStackTrace();
+			
+		}
+		return d;
 		
 		
 		
@@ -198,22 +208,25 @@ public class Parser {
     	regexInfo[0] = "";
     	regexInfo[1] = 0;
     	
-    	regexMatcher.find();
-    	if (regexMatcher.group().length() != 0)
-    	{	
-    		if (regexMatcher.group(1).contains("<AUTHOR>"))
-    		{
-    			titleTemp = regexMatcher.group(1).indexOf("<AUTHOR>");
-    			regexInfo[0] = regexMatcher.group(1).substring(0, titleTemp).trim();
-        		regexInfo[1] = regexMatcher.end();	
-    		}
-    		else
-    		{
-    			regexInfo[0] = regexMatcher.group(1).trim();
-        		regexInfo[1] = regexMatcher.end();
-    		}
-    		
+    	if (regexMatcher.find() == true)
+    	{
+    		if (regexMatcher.group().length() != 0)
+        	{	
+        		if (regexMatcher.group(1).contains("<AUTHOR>"))
+        		{
+        			titleTemp = regexMatcher.group(1).indexOf("<AUTHOR>");
+        			regexInfo[0] = regexMatcher.group(1).substring(0, titleTemp).trim();
+            		regexInfo[1] = regexMatcher.end();	
+        		}
+        		else
+        		{
+        			regexInfo[0] = regexMatcher.group(1).trim();
+            		regexInfo[1] = regexMatcher.end();
+        		}
+        		
+        	}
     	}
+    	
     	
     	return regexInfo;
     	
@@ -233,13 +246,13 @@ public class Parser {
     	{
     		if(regexMatcher.group().length() != 0)
     		{
-    			System.out.println(regexMatcher.group().trim());
     			fileCatReturn[0] = regexMatcher.group(1).trim();
     			fileCatReturn[1] = regexMatcher.group(2).trim();
     			return fileCatReturn;
     		}
     		
     	}
+    	System.out.println(Arrays.toString(fileCatReturn));
     	return fileCatReturn;
 	}
 	
@@ -262,6 +275,7 @@ public class Parser {
 	    		if (regexMatcher.group(1).contains(","))
 				{
 					authorData = regexMatcher.group(1).trim().split(",");
+					authorData[1] = authorData[1].trim();
 				}
 				else
 				{
@@ -269,9 +283,8 @@ public class Parser {
 				}
 	    		authorInfo[2] = regexMatcher.end();
 	    	
-	    	
-	    	authorInfo[0] = authorData[0].replaceFirst("(?i)by","").trim();
-	    	authorInfo[1] = authorData[1].trim();
+	    		authorInfo[0] = authorData[0].replaceFirst("(?i)by","").trim();
+	    		authorInfo[1] = authorData[1];
 	    	
 	    	}
     	}
@@ -296,7 +309,6 @@ public class Parser {
     			{
     				placeTemp = regexMatcher.group(1).indexOf("</AUTHOR>");
         			placeDateInfo[0] = regexMatcher.group(1).substring(placeTemp+10).trim();
-        			System.out.println("wassup");
     			}
     			else
     			{
