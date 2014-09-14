@@ -3,16 +3,21 @@
  */
 package edu.buffalo.cse.irf14.analysis;
 
+import java.util.Arrays;
+
 /**
  * @author nikhillo
  * Class that converts a given string into a {@link TokenStream} instance
  */
 public class Tokenizer {
+	// class variable that holds the delim to be used for token creation
+	private String delim = " ";
 	/**
 	 * Default constructor. Assumes tokens are whitespace delimited
 	 */
 	public Tokenizer() {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
+		this.delim = " ";
 	}
 	
 	/**
@@ -21,6 +26,7 @@ public class Tokenizer {
 	 */
 	public Tokenizer(String delim) {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
+		this.delim = delim;
 	}
 	
 	/**
@@ -39,6 +45,21 @@ public class Tokenizer {
 	 */
 	public TokenStream consume(String str) throws TokenizerException {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
-		return null;
+		// splitting the String str using the delimiter
+		if (str == null)
+		{
+			throw new TokenizerException();
+		}
+		String[] tokens = str.split(delim);
+		
+		TokenStream stream = new TokenStream();
+		for (String tempToken: tokens)
+		{	
+			stream.setToken(tempToken);
+		}
+		
+		stream.initIterator();
+		return stream;
+		
 	}
 }

@@ -4,6 +4,8 @@
 package edu.buffalo.cse.irf14.analysis;
 
 import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.ListIterator;
 
 /**
  * @author nikhillo
@@ -12,6 +14,9 @@ import java.util.Iterator;
  * behavior
  */
 public class TokenStream implements Iterator<Token>{
+	// Linked list that holds the stream of tokens
+	private LinkedList<Token> tokenStreamData = new LinkedList<Token>();
+	private ListIterator<Token> li;
 	
 	/**
 	 * Method that checks if there is any Token left in the stream
@@ -22,7 +27,15 @@ public class TokenStream implements Iterator<Token>{
 	@Override
 	public boolean hasNext() {
 		// TODO YOU MUST IMPLEMENT THIS
-		return false;
+		if (li.hasNext() == true)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		
 	}
 
 	/**
@@ -35,7 +48,15 @@ public class TokenStream implements Iterator<Token>{
 	@Override
 	public Token next() {
 		// TODO YOU MUST IMPLEMENT THIS
-		return null;
+		if (li.hasNext() != true)
+		{
+			return null;
+		}
+		else 
+		{
+			return li.next();
+		}
+		
 	}
 	
 	/**
@@ -47,6 +68,15 @@ public class TokenStream implements Iterator<Token>{
 	@Override
 	public void remove() {
 		// TODO YOU MUST IMPLEMENT THIS
+		if (li.hasPrevious() == false || li.hasNext() == false)
+		{
+			return;
+		}
+		else
+		{
+			li.remove();
+		}
+		
 		
 	}
 	
@@ -57,6 +87,11 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public void reset() {
 		//TODO : YOU MUST IMPLEMENT THIS
+		/* while (li.hasPrevious())
+		{
+			li.previous();
+		}*/
+		li = tokenStreamData.listIterator();
 	}
 	
 	/**
@@ -70,6 +105,22 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public void append(TokenStream stream) {
 		//TODO : YOU MUST IMPLEMENT THIS
+		int nextIndex;
+		nextIndex = li.nextIndex();
+		
+		while(li.hasPrevious())
+		{
+			li.previous();
+		}
+		for (Token temp: stream.getTokenStream())
+		{
+			li.add(temp);
+		}
+		while(li.nextIndex() != nextIndex)
+		{
+			li.next();
+		}
+		
 	}
 	
 	/**
@@ -82,7 +133,43 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public Token getCurrent() {
 		//TODO: YOU MUST IMPLEMENT THIS
-		return null;
+		
+		int nextIndex;
+		
+		if (li.hasNext()){
+			nextIndex = li.nextIndex() - 1;
+			return tokenStreamData.get(nextIndex);
+		}
+		else
+		{
+			return null;
+		}
+		
+		
 	}
 	
+	/**
+	 * Setter Method to add tokens to the list
+	 * @param String tokenString: the string to be added to the list tokenStreamData as a new token 
+	 */
+	public void setToken(String tokenString){
+		// creating a token object and adding it to the end of linked list
+		Token tempToken = new Token();
+		tempToken.setTermText(tokenString);
+		this.tokenStreamData.add(tempToken);
+	}
+	
+	/**
+	 * Getter Method to retrieve Token Stream
+	 * @return tokenStreamData - linked list of the token objects
+	 */
+	public LinkedList<Token> getTokenStream()
+	{
+		return tokenStreamData;
+	}
+	
+	
+	public void initIterator(){
+		li = tokenStreamData.listIterator();
+	}
 }
