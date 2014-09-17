@@ -17,6 +17,8 @@ public class TokenStream implements Iterator<Token>{
 	// Linked list that holds the stream of tokens
 	private LinkedList<Token> tokenStreamData = new LinkedList<Token>();
 	private ListIterator<Token> li;
+	public int noOfTokensInStream = 0;
+	private Token currentToken = null;
 	
 	/**
 	 * Method that checks if there is any Token left in the stream
@@ -50,11 +52,13 @@ public class TokenStream implements Iterator<Token>{
 		// TODO YOU MUST IMPLEMENT THIS
 		if (li.hasNext() != true)
 		{
+			this.currentToken = null;
 			return null;
 		}
 		else 
-		{
-			return li.next();
+		{	
+			this.currentToken = li.next();
+			return currentToken;
 		}
 		
 	}
@@ -68,16 +72,15 @@ public class TokenStream implements Iterator<Token>{
 	@Override
 	public void remove() {
 		// TODO YOU MUST IMPLEMENT THIS
-		if (li.hasPrevious() == false || li.hasNext() == false)
+		if (li.nextIndex() == 0)
 		{
 			return;
 		}
 		else
 		{
 			li.remove();
+			this.currentToken = null;
 		}
-		
-		
 	}
 	
 	/**
@@ -87,11 +90,8 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public void reset() {
 		//TODO : YOU MUST IMPLEMENT THIS
-		/* while (li.hasPrevious())
-		{
-			li.previous();
-		}*/
 		li = tokenStreamData.listIterator();
+		this.currentToken = null;
 	}
 	
 	/**
@@ -105,17 +105,18 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public void append(TokenStream stream) {
 		//TODO : YOU MUST IMPLEMENT THIS
+		
 		int nextIndex;
 		nextIndex = li.nextIndex();
-		
-		while(li.hasPrevious())
-		{
-			li.previous();
-		}
+		if (stream == null) return;
+		li = null;
 		for (Token temp: stream.getTokenStream())
 		{
-			li.add(temp);
+			tokenStreamData.add(temp);
 		}
+		
+		li = tokenStreamData.listIterator();
+		
 		while(li.nextIndex() != nextIndex)
 		{
 			li.next();
@@ -134,16 +135,8 @@ public class TokenStream implements Iterator<Token>{
 	public Token getCurrent() {
 		//TODO: YOU MUST IMPLEMENT THIS
 		
-		int nextIndex;
 		
-		if (li.hasNext()){
-			nextIndex = li.nextIndex() - 1;
-			return tokenStreamData.get(nextIndex);
-		}
-		else
-		{
-			return null;
-		}
+		return this.currentToken;
 		
 		
 	}
@@ -157,6 +150,7 @@ public class TokenStream implements Iterator<Token>{
 		Token tempToken = new Token();
 		tempToken.setTermText(tokenString);
 		this.tokenStreamData.add(tempToken);
+		this.noOfTokensInStream++;
 	}
 	
 	/**
@@ -169,7 +163,14 @@ public class TokenStream implements Iterator<Token>{
 	}
 	
 	
+	
+	/**
+	 * Set the iterator to initial position -1
+	 */
 	public void initIterator(){
 		li = tokenStreamData.listIterator();
 	}
+	
+
+	
 }

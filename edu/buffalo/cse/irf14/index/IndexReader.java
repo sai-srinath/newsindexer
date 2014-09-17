@@ -20,6 +20,7 @@ public class IndexReader {
 	 */
 	public IndexReader(String indexDir, IndexType type) {
 		//TODO
+		
 	}
 	
 	/**

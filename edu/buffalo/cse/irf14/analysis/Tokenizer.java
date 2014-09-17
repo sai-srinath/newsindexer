@@ -11,13 +11,13 @@ import java.util.Arrays;
  */
 public class Tokenizer {
 	// class variable that holds the delim to be used for token creation
-	private String delim = " ";
+	private String delim;
 	/**
 	 * Default constructor. Assumes tokens are whitespace delimited
 	 */
 	public Tokenizer() {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
-		this.delim = " ";
+		this.delim = "\\s+";
 	}
 	
 	/**
@@ -26,7 +26,15 @@ public class Tokenizer {
 	 */
 	public Tokenizer(String delim) {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
-		this.delim = delim;
+		if (delim.matches("[\\^\\*\\$\\.\\|\\?\\*\\+\\(\\)\\[\\{]"))
+		{
+			this.delim = "\\" + delim + "+";
+		}
+		else
+		{
+			this.delim = delim;
+		}
+		
 	}
 	
 	/**
@@ -46,16 +54,24 @@ public class Tokenizer {
 	public TokenStream consume(String str) throws TokenizerException {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
 		// splitting the String str using the delimiter
-		if (str == null)
+		if (str == null || str == "")
 		{
 			throw new TokenizerException();
 		}
+		
 		String[] tokens = str.split(delim);
 		
 		TokenStream stream = new TokenStream();
 		for (String tempToken: tokens)
 		{	
-			stream.setToken(tempToken);
+			if (tempToken.trim() != "") {
+				stream.setToken(tempToken);
+			}
+			else
+			{
+				continue;
+			}
+			
 		}
 		
 		stream.initIterator();

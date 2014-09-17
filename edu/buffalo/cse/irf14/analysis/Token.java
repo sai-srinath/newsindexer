@@ -17,6 +17,7 @@ public class Token {
 	//The char array backing termText
 	private char[] termBuffer;
 	
+	
 	/**
 	 * Method to set the termText to given text.
 	 * This is a sample implementation and you CAN change this
@@ -34,7 +35,7 @@ public class Token {
 	 * to suit your class definition and data structure needs.
 	 * @return the underlying termText
 	 */
-	protected String getTermText() {
+	public String getTermText() {
 		return termText;
 	}
 	
@@ -67,6 +68,25 @@ public class Token {
 	 */
 	protected void merge(Token...tokens) {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
+		// if there are no tokens , do NOTHING. else, check if there are junk tokens having only
+		// "", else update termText
+		if (tokens == null){
+			return;
+		}
+		else
+		{
+			for (Token singleToken:tokens)
+			{
+				if (singleToken.getTermText().trim() == "")
+				{
+					continue;
+				}
+				else
+				{
+					this.termText = this.termText + " " + singleToken.getTermText();
+				}
+			}
+		}
 	}
 	
 	/**
@@ -84,6 +104,6 @@ public class Token {
 	@Override
 	public String toString() {
 		//TODO: YOU MUST IMPLEMENT THIS METHOD
-		return null;
+		return termText;
 	}
 }

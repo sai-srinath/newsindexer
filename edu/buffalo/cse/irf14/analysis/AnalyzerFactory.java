@@ -21,9 +21,21 @@ public class AnalyzerFactory {
 	 * during instantiation
 	 * @return An instance of the factory
 	 */
+	
+	private static AnalyzerFactory firstInstance = null;
+	
+	private AnalyzerFactory(){}
+	
 	public static AnalyzerFactory getInstance() {
 		//TODO: YOU NEED TO IMPLEMENT THIS METHOD
-		return null;
+		
+		if (firstInstance == null)
+		{
+			firstInstance = new AnalyzerFactory();
+			
+		}
+		return firstInstance;
+		
 	}
 	
 	/**
