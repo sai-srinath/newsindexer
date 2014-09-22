@@ -3,8 +3,13 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import java.io.*;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+
+import edu.buffalo.cse.irf14.index.IndexWriter.Postings;
 
 /**
  * @author nikhillo
@@ -18,8 +23,115 @@ public class IndexReader {
 	 * you make subdirectories etc., you will have to handle it accordingly.
 	 * @param type The {@link IndexType} to read from
 	 */
+	// HashMaps that get the index as well as Top K terms from disk
+	private HashMap<Integer, LinkedList<Postings>> Index;
+	private HashMap<String, Integer> Dictionary;
+	private HashMap<String, Integer> kTermIndex;
+	private HashMap<String, Integer> fileIDDictionary;
+	
 	public IndexReader(String indexDir, IndexType type) {
 		//TODO
+		if (type == IndexType.AUTHOR)
+		{
+			
+			try
+			{
+				FileInputStream fis = new FileInputStream(indexDir + File.separator + "authorIndex.ser");
+				
+		        ObjectInputStream ois = new ObjectInputStream(fis);
+		        Index = (HashMap<Integer, LinkedList<Postings>>) ois.readObject();
+		        Dictionary = (HashMap<String, Integer>) ois.readObject();
+		        
+		        fis = new FileInputStream(indexDir + File.separator + "fileIDDict.ser");
+		        ois = new ObjectInputStream(fis);
+		        fileIDDictionary = (HashMap<String, Integer>) ois.readObject();
+		        
+		        
+		        ois.close();
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+			} catch (ClassNotFoundException e)
+			{
+				e.printStackTrace();
+			}
+			
+		}
+		else if (type == IndexType.TERM)
+		{
+			
+			try
+			{
+				FileInputStream fis = new FileInputStream(indexDir + File.separator + "termIndex.ser");
+				
+		        ObjectInputStream ois = new ObjectInputStream(fis);
+		        Index = (HashMap<Integer, LinkedList<Postings>>) ois.readObject();
+		        Dictionary = (HashMap<String, Integer>) ois.readObject();
+		        
+		        fis = new FileInputStream(indexDir + File.separator + "fileIDDict.ser");
+		        ois = new ObjectInputStream(fis);
+		        fileIDDictionary = (HashMap<String, Integer>) ois.readObject();
+		        
+		        ois.close();
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+			} catch (ClassNotFoundException e)
+			{
+				e.printStackTrace();
+			}
+			
+		}
+		else if (type == IndexType.PLACE)
+		{
+			
+			try
+			{
+				FileInputStream fis = new FileInputStream(indexDir + File.separator + "placeIndex.ser");
+				
+		        ObjectInputStream ois = new ObjectInputStream(fis);
+		        Index = (HashMap<Integer, LinkedList<Postings>>) ois.readObject();
+		        Dictionary = (HashMap<String, Integer>) ois.readObject();
+		        
+		        fis = new FileInputStream(indexDir + File.separator + "fileIDDict.ser");
+		        ois = new ObjectInputStream(fis);
+		        fileIDDictionary = (HashMap<String, Integer>) ois.readObject();
+		        
+		        ois.close();
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+			} catch (ClassNotFoundException e)
+			{
+				e.printStackTrace();
+			}
+			
+		}
+		else if (type == IndexType.CATEGORY)
+		{
+			
+			try
+			{
+				FileInputStream fis = new FileInputStream(indexDir + File.separator + "categoryIndex.ser");
+				
+		        ObjectInputStream ois = new ObjectInputStream(fis);
+		        Index = (HashMap<Integer, LinkedList<Postings>>) ois.readObject();
+		        Dictionary = (HashMap<String, Integer>) ois.readObject();
+		        
+		        fis = new FileInputStream(indexDir + File.separator + "fileIDDict.ser");
+		        ois = new ObjectInputStream(fis);
+		        fileIDDictionary = (HashMap<String, Integer>) ois.readObject();
+		        
+		        ois.close();
+			} catch (IOException e)
+			{
+				e.printStackTrace();
+			} catch (ClassNotFoundException e)
+			{
+				e.printStackTrace();
+			}
+			
+		}
 		
 	}
 	
@@ -30,7 +142,7 @@ public class IndexReader {
 	 */
 	public int getTotalKeyTerms() {
 		//TODO : YOU MUST IMPLEMENT THIS
-		return -1;
+		return Index.size();
 	}
 	
 	/**

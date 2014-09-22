@@ -3,6 +3,12 @@
  */
 package edu.buffalo.cse.irf14.index;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -17,7 +23,7 @@ import edu.buffalo.cse.irf14.analysis.*;
  * @author nikhillo
  * Class responsible for writing indexes to disk
  */
-public class IndexWriter extends Token{
+public class IndexWriter extends Token implements Serializable{
 	
 	
 	// Class Variables needed
@@ -172,14 +178,12 @@ public class IndexWriter extends Token{
 		// DONE with the category index, now moving on to indexing TITLE, CONTENT, AUTHORORG 
 		// together into the term index for the given DOCUMENT
 		
-		if (d.getField(FieldNames.TITLE)[0] != "" && d.getField(FieldNames.TITLE)[0] != " "
-				&& d.getField(FieldNames.TITLE) != null)
+		if (d.getField(FieldNames.TITLE) != null)
 		{
 			analyzeField(FieldNames.TITLE, d.getField(FieldNames.TITLE)[0], idFile);	
 		}
 		
-		if (d.getField(FieldNames.CONTENT)[0] != "" && d.getField(FieldNames.CONTENT)[0] != " "
-				&& d.getField(FieldNames.CONTENT) != null)
+		if (d.getField(FieldNames.CONTENT) != null)
 		{
 			analyzeField(FieldNames.CONTENT, d.getField(FieldNames.CONTENT)[0], idFile);	
 		}
@@ -217,7 +221,54 @@ public class IndexWriter extends Token{
 	 * @throws IndexerException : In case any error occurs
 	 */
 	public void close() throws IndexerException {
+		
 		//TODO
+		try{
+			FileOutputStream fos = new FileOutputStream(this.indexDirectory+File.separator+"termIndex.ser");
+			System.out.println("loop entered");
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+	        oos.writeObject(this.termIndex);
+	        oos.writeObject(this.termDictionary);
+	        fos.close();
+	        
+	        fos = new FileOutputStream(this.indexDirectory+File.separator+"authorIndex.ser");
+	        oos = new ObjectOutputStream(fos);
+	        oos.writeObject(this.authorIndex);
+	        oos.writeObject(this.authorDictionary);
+	        fos.close();
+	        
+	        fos = new FileOutputStream(this.indexDirectory+File.separator+"placeIndex.ser");
+	        oos = new ObjectOutputStream(fos);
+	        oos.writeObject(this.placeIndex);
+	        oos.writeObject(this.placeDictionary);
+	        fos.close();
+	        
+	        fos = new FileOutputStream(this.indexDirectory+File.separator+"categoryIndex.ser");
+	        oos = new ObjectOutputStream(fos);
+	        oos.writeObject(this.categoryIndex);
+	        oos.writeObject(this.categoryDictionary);
+	        fos.close();
+	        
+	        fos = new FileOutputStream(this.indexDirectory+File.separator+"kTermMap.ser");
+	        oos = new ObjectOutputStream(fos);
+	        oos.writeObject(this.kTermMap);
+	        fos.close();
+	        
+	        fos = new FileOutputStream(this.indexDirectory+File.separator+"fileIDDict.ser");
+	        oos = new ObjectOutputStream(fos);
+	        oos.writeObject(this.fileIDDictionary);
+	        fos.close();
+	        
+	        System.out.println("All writes done!!");
+	        
+	        
+	        
+	        
+		} catch (IOException e)
+		{
+			e.printStackTrace();
+		}
+		
 		
 		
 		
@@ -229,6 +280,7 @@ public class IndexWriter extends Token{
 		Token t;
 		String tokenText;
 		boolean sameStream = false;
+		
 		
 
 		if(fn == FieldNames.TITLE || fn == FieldNames.CONTENT || fn == FieldNames.NEWSDATE

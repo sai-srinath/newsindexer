@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -38,23 +39,27 @@ public class IndexerTest {
 	private IndexReader reader;
 	
 	@BeforeClass
-	public final void setupIndex() throws IndexerException {
+	public final static void setupIndex() throws IndexerException {
 		String[] strs = {"new home sales top sales forecasts", "home sales rise in july", 
 				"increase in home sales in july", "july new home sales rise"};
 		int len = strs.length;
 		Document d;
-		String dir = System.getProperty("INDEX.DIR");
+		String dir = "Users/Girish/Projects/newsindexer/Indexes";
 		IndexWriter writer = new IndexWriter(dir); //set this beforehand
 		for (int i = 0; i < len; i++) {
 			d = new Document();
 			d.setField(FieldNames.FILEID, "0000"+(i+1));
 			d.setField(FieldNames.CONTENT, strs[i]);
+			d.setField(FieldNames.CATEGORY, "cotton");
 			writer.addDocument(d);
 		}
 		
 		writer.close();
-		
-		reader = new IndexReader(dir, IndexType.TERM);
+	}
+
+	@Before
+	public final void before() {
+		reader = new IndexReader("Users/Girish/Projects/newsindexer/Indexes", IndexType.TERM);
 	}
 	
 	/**
@@ -78,7 +83,7 @@ public class IndexerTest {
 	 */
 	@Test
 	public final void testGetPostings() {
-		String query = getAnalyzedTerm("home");
+		String query = "home";
 		Map<String, Integer> map = reader.getPostings(query);
 		assertNotNull(map);
 		assertEquals(4, map.size(), 0);
@@ -91,13 +96,13 @@ public class IndexerTest {
 		assertTrue(map.containsKey("00004"));
 		assertEquals(1, map.get("00004"), 0);
 		
-		query = getAnalyzedTerm("forecasts");
+		query = "forecasts";
 		map = reader.getPostings(query);
 		assertEquals(1, map.size(), 0);
 		assertTrue(map.containsKey("00001"));
 		assertEquals(1, map.get("00001"), 0);
 		
-		query = getAnalyzedTerm("null");
+		query = null;
 		map = reader.getPostings(query);
 		assertNull(map);
 	}
@@ -193,7 +198,7 @@ public class IndexerTest {
 	}
 
 	private Map<String, Integer> intersect(HashMap<String, Integer>...hashMaps) {
-		HashMap<String, Integer> basemap = hashMaps[0];
+		HashMap<String, Integer> basemap = new HashMap<String, Integer>(hashMaps[0]);
 		
 		int len = hashMaps.length;
 		String key;
@@ -214,7 +219,7 @@ public class IndexerTest {
 		return basemap;
 	}
 	
-	// Prepare an inverted index that maps docID's to 
+	
 	@SuppressWarnings("unchecked")
 	private HashMap<String, Integer>[] prepareIndex(
 			String[] queryTerms) {
@@ -224,13 +229,17 @@ public class IndexerTest {
 
 		HashMap<String, Integer> temp = null;
 		String[] splits;
-		
+		int val;
+
 		for (String cnt : counts) {
 			temp = new HashMap<String, Integer>();
 			splits = cnt.split("/");
 			
 			for (int i = 0; i < 4; i++) {
-				temp.put(docids[i], Integer.valueOf(splits[i]));
+				val = Integer.valueOf(splits[i]);
+
+				if (val > 0)
+					temp.put(docids[i], val);
 			}
 			
 			retlist.add(temp);

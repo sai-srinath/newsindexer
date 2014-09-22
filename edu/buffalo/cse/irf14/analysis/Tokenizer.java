@@ -54,7 +54,7 @@ public class Tokenizer {
 	public TokenStream consume(String str) throws TokenizerException {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
 		// splitting the String str using the delimiter
-		if (str == null || str == "")
+		if (str == null)
 		{
 			throw new TokenizerException();
 		}
