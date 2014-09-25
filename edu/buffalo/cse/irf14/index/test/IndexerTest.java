@@ -44,13 +44,12 @@ public class IndexerTest {
 				"increase in home sales in july", "july new home sales rise"};
 		int len = strs.length;
 		Document d;
-		String dir = "Users/Girish/Projects/newsindexer/Indexes";
+		String dir = System.getProperty("INDEX.DIR");
 		IndexWriter writer = new IndexWriter(dir); //set this beforehand
 		for (int i = 0; i < len; i++) {
 			d = new Document();
 			d.setField(FieldNames.FILEID, "0000"+(i+1));
 			d.setField(FieldNames.CONTENT, strs[i]);
-			d.setField(FieldNames.CATEGORY, "cotton");
 			writer.addDocument(d);
 		}
 		
@@ -59,7 +58,7 @@ public class IndexerTest {
 
 	@Before
 	public final void before() {
-		reader = new IndexReader("Users/Girish/Projects/newsindexer/Indexes", IndexType.TERM);
+		reader = new IndexReader(System.getProperty("INDEX.DIR"), IndexType.TERM);
 	}
 	
 	/**
@@ -83,7 +82,7 @@ public class IndexerTest {
 	 */
 	@Test
 	public final void testGetPostings() {
-		String query = "home";
+		String query = getAnalyzedTerm("home");
 		Map<String, Integer> map = reader.getPostings(query);
 		assertNotNull(map);
 		assertEquals(4, map.size(), 0);
@@ -96,13 +95,13 @@ public class IndexerTest {
 		assertTrue(map.containsKey("00004"));
 		assertEquals(1, map.get("00004"), 0);
 		
-		query = "forecasts";
+		query = getAnalyzedTerm("forecasts");
 		map = reader.getPostings(query);
 		assertEquals(1, map.size(), 0);
 		assertTrue(map.containsKey("00001"));
 		assertEquals(1, map.get("00001"), 0);
 		
-		query = null;
+		query = getAnalyzedTerm("null");
 		map = reader.getPostings(query);
 		assertNull(map);
 	}

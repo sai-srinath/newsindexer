@@ -51,6 +51,11 @@ public class AnalyzerFactory {
 	 */
 	public Analyzer getAnalyzerForField(FieldNames name, TokenStream stream) {
 		//TODO : YOU NEED TO IMPLEMENT THIS METHOD
-		return null;
+		
+		// need the class DoNothing class to return an Analyzer class which does nothing when 
+		// the increment() method is called
+		DoNothing d = new DoNothing(stream);
+		
+		return d;
 	}
 }

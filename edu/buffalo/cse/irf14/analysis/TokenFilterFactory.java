@@ -44,6 +44,28 @@ public class TokenFilterFactory {
 	 */
 	public TokenFilter getFilterByType(TokenFilterType type, TokenStream stream) {
 		//TODO : YOU MUST IMPLEMENT THIS METHOD
-		return null;
+		
+		// below is just sample code for my own reference
+		TokenFilter a;
+		if (type == TokenFilterType.ACCENT)
+		{
+			a = new AccentFilter(stream);
+		}
+		else if (type == TokenFilterType.STOPWORD)
+		{
+			a = new StopwordsFilter(stream);
+		}
+		else if (type == TokenFilterType.STEMMER)
+		{
+			a = new PorterStemmerFilter(stream);
+		}
+		else
+		{
+			a = null;
+		}
+		
+		
+		
+		return a;
 	}
 }
