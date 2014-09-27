@@ -20,6 +20,24 @@ public class TokenStream implements Iterator<Token>{
 	public int noOfTokensInStream = 0;
 	private Token currentToken = null;
 	
+	
+	/**
+	 * toString Method that returns the tokenStream as a string
+	 * @return - String
+	 */
+	public String toString()
+	{
+		String streamContent = "";
+		for (Token abc:this.tokenStreamData)
+		{
+			streamContent = streamContent + abc.getTermText() + " ";
+			
+		}
+		
+		
+		return streamContent;
+	}
+	
 	/**
 	 * Method that checks if there is any Token left in the stream
 	 * with regards to the current pointer.
@@ -38,6 +56,22 @@ public class TokenStream implements Iterator<Token>{
 			return false;
 		}
 		
+	}
+	
+	/**
+	 * Custom Method that checks if there is any Token behind it in the 
+	 * stream.
+	 * @return true if at least one token exists, false otherwise
+	 */
+	public boolean hasPrevious() {
+		if(li.hasPrevious() == true)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	/**
@@ -61,6 +95,23 @@ public class TokenStream implements Iterator<Token>{
 			return currentToken;
 		}
 		
+	}
+	
+	/**
+	 * Method to move the iterator one step back in the stream. This is a custom method
+	 * defined by me
+	 */
+	public Token previous() {
+		if (li.hasPrevious() != true)
+		{
+			this.currentToken = null;
+			return null;
+		}
+		else
+		{
+			this.currentToken = li.previous();
+			return currentToken;
+		}
 	}
 	
 	/**
@@ -149,6 +200,12 @@ public class TokenStream implements Iterator<Token>{
 		// creating a token object and adding it to the end of linked list
 		Token tempToken = new Token();
 		tempToken.setTermText(tokenString);
+		
+		if(this.tokenStreamData.isEmpty())
+		{
+			tempToken.setFirstToken(true);
+		}
+		
 		this.tokenStreamData.add(tempToken);
 		this.noOfTokensInStream++;
 	}
@@ -169,6 +226,18 @@ public class TokenStream implements Iterator<Token>{
 	 */
 	public void initIterator(){
 		li = tokenStreamData.listIterator();
+	}
+	
+	/**
+	 * CUSTOM method that returns the current next index that the iterator can see
+	 */
+	public int nextIndex()
+	{
+		
+		int nextIndex;
+		nextIndex = li.nextIndex();
+		return nextIndex;
+		
 	}
 	
 

@@ -59,6 +59,26 @@ public class TokenFilterFactory {
 		{
 			a = new PorterStemmerFilter(stream);
 		}
+		else if (type == TokenFilterType.DATE)
+		{
+			a = new DatesFilter(stream);
+		}
+		else if (type == TokenFilterType.SYMBOL)
+		{
+			a = new SymbolFilter(stream);
+		}
+		else if (type == TokenFilterType.CAPITALIZATION)
+		{
+			a = new CapitalizationFilter(stream);
+		}
+		else if (type == TokenFilterType.SPECIALCHARS) 
+		{
+			a = new SpecialCharactersFilter(stream);
+		}
+		else if (type == TokenFilterType.NUMERIC) 
+		{
+			a = new NumbersFilter(stream);
+		}
 		else
 		{
 			a = null;

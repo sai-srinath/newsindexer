@@ -38,7 +38,7 @@ public class SymbolRuleTest extends TFRuleBaseTest {
 			} catch (TokenizerException e) {
 
 			}
-		}
+		} 
 		
 		@Test
 		public void punctuationTest() {
@@ -85,7 +85,9 @@ public class SymbolRuleTest extends TFRuleBaseTest {
 			}
 		}
 
-		@Test
+		
+		 @Test
+		 
 		public void hyphenTest() {
 			try {
 				// If a hyphen occurs within a alphanumeric
@@ -113,5 +115,5 @@ public class SymbolRuleTest extends TFRuleBaseTest {
 			}catch (TokenizerException e){
 				
 			}
-		}
+		}  
 }

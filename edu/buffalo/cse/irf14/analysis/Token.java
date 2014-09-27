@@ -16,7 +16,8 @@ public class Token {
 	private String termText;
 	//The char array backing termText
 	private char[] termBuffer;
-	
+	private boolean isSentenceBoundary = false;
+	private boolean isFirstToken = false;
 	
 	/**
 	 * Method to set the termText to given text.
@@ -27,6 +28,10 @@ public class Token {
 	protected void setTermText(String text) {
 		termText = text;
 		termBuffer = (termText != null) ? termText.toCharArray() : null;
+		if (text.matches("(([^\\.]+)(\\.|\\?|!)+)"))
+		{
+			this.isSentenceBoundary = true;
+		}
 	}
 	
 	/**
@@ -106,4 +111,29 @@ public class Token {
 		//TODO: YOU MUST IMPLEMENT THIS METHOD
 		return termText;
 	}
+	
+	/**
+	 * To get the value of the isSentenceBoundary Flag
+	 */
+	public boolean getSentenceBoundary()
+	{
+		return this.isSentenceBoundary;
+	}
+	
+	/**
+	 * SETTER for first Token in stream
+	 */
+	public void setFirstToken(boolean a)
+	{
+		this.isFirstToken = true;
+	}
+	
+	/**
+	 * GETTER method for whether first token or not
+	 */
+	public boolean getFirstToken()
+	{
+		return this.isFirstToken;
+	}
+	
 }
