@@ -32,9 +32,9 @@ public class TokenStream implements Iterator<Token>{
 		{
 			streamContent = streamContent + abc.getTermText() + " ";
 			
+			
 		}
-		
-		
+		streamContent = streamContent.trim();
 		return streamContent;
 	}
 	

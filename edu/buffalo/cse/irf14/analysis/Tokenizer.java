@@ -56,7 +56,7 @@ public class Tokenizer {
 		// splitting the String str using the delimiter
 		
 		if (str == null)
-		{
+		{	
 			throw new TokenizerException();
 		}
 		

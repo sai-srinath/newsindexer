@@ -126,7 +126,6 @@ class SpecialCharactersFilter extends TokenFilter
 			{	
 				
 				tokenContent = tokenContent.replaceAll("-", "");
-				System.out.println(tokenContent);
 			}
 			
 			
@@ -280,12 +279,10 @@ class CapitalizationFilter extends TokenFilter
 				// first checking if current token is in Camel Case format
 				if (isCamelCase(tokenContent))
 				{	
-					System.out.println("loop entered");
 					// if there is an adjacent token
 					if(stream.hasNext())
 					{
 						adjacentToken = stream.next().getTermText();
-						System.out.println(adjacentToken);
 						if (isCamelCase(adjacentToken))
 						{	
 							
@@ -585,7 +582,6 @@ class DatesFilter extends TokenFilter
 			// INSIDE the first token
 			// get the first term
 			firstToken = stream.next().getTermText();
-			System.out.println("has first token");
 			if (firstToken.matches("[0-9]{1,4}") // for day of month 
 				|| firstToken.matches("((?i)((jan|feb)(.*)(ary)?)|((sep|oct|nov|dec)(.*)(ber)?)|((apr)(il)?|(mar)(ch)?|may|(jun)(e)?|(jul)(y)?))") // for month name
 				|| firstToken.matches("[0-1]?[0-9]:[0-6]?[0-9]") // for time in hh:mm format
@@ -593,29 +589,24 @@ class DatesFilter extends TokenFilter
 				|| firstToken.matches("((?i)[0-9]{1,}(ad|bc)\\.)") // check for 847AD. like cases
 				|| firstToken.matches("[0-9]{4}(-)[0-9]{2}\\.")) // to check for cases like 2011-12
 			{	
-				System.out.println("entered 1");
 				// NOW making sure that there is a second token still in the stream,
 				// if not , then check the one token cases
 				if(stream.hasNext())
 				{	// NOW inside the Second Token
 					// pointer is at A  B | C
-					System.out.println("has second term");
 					secondToken = stream.next().getTermText();
 					if(secondToken.matches("((?i)((jan|feb)(.*)(ary)?)|((sep|oct|nov|dec)(.*)(ber)?)|((apr)(il)?|(mar)(ch)?|may|(jun)(e)?|(jul)(y)?))")
 						|| secondToken.matches("[0-9]{1,4},?")
 						|| secondToken.matches("(?i)(ad|bc)")
 						|| secondToken.matches("((?i)(am|pm))\\."))
 					{	
-						System.out.println("entered 2");
 						if(stream.hasNext()) // check if there is a third token
 						{	
-							System.out.println("has third term");
 							thirdToken = stream.next().getTermText();
 							// there is a third token so pointer is at A  B  C |
 							if(thirdToken.matches("[0-9]{4}")
 									|| thirdToken.matches("[0-9]{4},"))
 							{	
-								System.out.println("entered 3");
 								// if regex matches these three if cases then it must be a 3 token
 								// expression
 								stream.remove();
@@ -657,7 +648,6 @@ class DatesFilter extends TokenFilter
 							}
 							else // if their is a third token and no match pointer is at A  B  C|
 							{
-								System.out.println("entered else after not matching third token");
 								regexData = firstToken + " " + secondToken;
 								if (regexData.matches("(?i)([0-9]{1,4}\\s(bc|ad))")) // for cases like 84 BC
 								{
@@ -687,7 +677,6 @@ class DatesFilter extends TokenFilter
 								}
 								else if (regexData.matches("((?i)((jan|feb)(.*)(ary)?)|((sep|oct|nov|dec)(.*)(ber)?)|((apr)(il)?|(mar)(ch)?|may|(jun)(e)?|(jul)(y)?))\\s[0-3]?[0-9]"))
 								{	
-									System.out.println("entered April 11 case");
 									date = new SimpleDateFormat("MMMM dd", Locale.ENGLISH).parse(regexData);
 									cal.setTime(date);
 									cal.set(Calendar.YEAR, 1900);
@@ -752,7 +741,6 @@ class DatesFilter extends TokenFilter
 						// match all the one token rules
 					{
 						regexData = firstToken;
-						System.out.println(firstToken);
 						if (regexData.matches("[0-9]{4}")) // for cases like 1948
 						{
 							date = new SimpleDateFormat("yyyy", Locale.ENGLISH).parse(regexData);
@@ -779,7 +767,6 @@ class DatesFilter extends TokenFilter
 						}
 						else if (regexData.matches("[0-9]{4}(-)[0-9]{2}\\.")) // for cases like 2011-12
 						{	
-							System.out.println("enters dreaded DRACULA");
 							String[] twoyears;
 							twoyears = regexData.split("-");
 							
@@ -812,6 +799,7 @@ class DatesFilter extends TokenFilter
 						SimpleDateFormat simple = new SimpleDateFormat("yyyyMMdd");
 						simple.setCalendar(cal);
 						transformedData = simple.format(cal.getTime());
+						stream.getCurrent().setTermText(transformedData);
 					}
 					else if (regexData.matches("((?i)[0-1]?[0-9]:[0-6]?[0-9](pm|am)\\.?)")) // for cases like 5:15PM.
 					{
@@ -820,6 +808,7 @@ class DatesFilter extends TokenFilter
 						SimpleDateFormat simple = new SimpleDateFormat("HH:mm:ss");
 						simple.setCalendar(cal);
 						transformedData = simple.format(cal.getTime()) + ".";
+						stream.getCurrent().setTermText(transformedData);
 					}
 					else if (regexData.matches("((?i)[0-9]{1,}(ad|bc)\\.)")) // for cases like 847AD
 					{
@@ -828,6 +817,7 @@ class DatesFilter extends TokenFilter
 						SimpleDateFormat simple = new SimpleDateFormat("yyyyMMdd");
 						simple.setCalendar(cal);
 						transformedData = simple.format(cal.getTime()) + ".";
+						stream.getCurrent().setTermText(transformedData);
 					}
 					else if (regexData.matches("[0-9]{4}(-)[0-9]{2}\\.")) // for cases like 2011-12
 					{
@@ -847,9 +837,10 @@ class DatesFilter extends TokenFilter
 						simple.setCalendar(cal);
 						twoyears[1] = simple.format(cal.getTime());
 						transformedData = twoyears[0] + "-" + twoyears[1] + ".";
+						stream.getCurrent().setTermText(transformedData);
 					}
 				}
-				stream.getCurrent().setTermText(transformedData);
+				
 				stream.previous();
 				stream.next();
 			}

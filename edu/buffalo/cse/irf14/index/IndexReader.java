@@ -4,10 +4,14 @@
 package edu.buffalo.cse.irf14.index;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
+import java.util.Map.Entry;
 
 import edu.buffalo.cse.irf14.index.IndexWriter.Postings;
 
@@ -28,6 +32,7 @@ public class IndexReader {
 	private HashMap<String, Integer> Dictionary;
 	private HashMap<String, Integer> kTermIndex;
 	private HashMap<String, Integer> fileIDDictionary;
+	private HashMap<Integer, String> inverseFileIDDictionary;
 	
 	public IndexReader(String indexDir, IndexType type) {
 		//TODO
@@ -45,7 +50,7 @@ public class IndexReader {
 		        fis = new FileInputStream(indexDir + File.separator + "fileIDDict.ser");
 		        ois = new ObjectInputStream(fis);
 		        fileIDDictionary = (HashMap<String, Integer>) ois.readObject();
-		        
+		        this.inverseFileIDDictionary = (HashMap<Integer, String>) ois.readObject();
 		        
 		        ois.close();
 			} catch (IOException e)
@@ -71,6 +76,12 @@ public class IndexReader {
 		        fis = new FileInputStream(indexDir + File.separator + "fileIDDict.ser");
 		        ois = new ObjectInputStream(fis);
 		        fileIDDictionary = (HashMap<String, Integer>) ois.readObject();
+		        this.inverseFileIDDictionary = (HashMap<Integer, String>) ois.readObject();
+		        
+		        fis = new FileInputStream(indexDir + File.separator + "kTermMap.ser");
+		        ois = new ObjectInputStream(fis);
+		        this.kTermIndex = (HashMap<String, Integer>) ois.readObject();
+		        
 		        
 		        ois.close();
 			} catch (IOException e)
@@ -96,6 +107,7 @@ public class IndexReader {
 		        fis = new FileInputStream(indexDir + File.separator + "fileIDDict.ser");
 		        ois = new ObjectInputStream(fis);
 		        fileIDDictionary = (HashMap<String, Integer>) ois.readObject();
+		        this.inverseFileIDDictionary = (HashMap<Integer, String>) ois.readObject();
 		        
 		        ois.close();
 			} catch (IOException e)
@@ -121,6 +133,8 @@ public class IndexReader {
 		        fis = new FileInputStream(indexDir + File.separator + "fileIDDict.ser");
 		        ois = new ObjectInputStream(fis);
 		        fileIDDictionary = (HashMap<String, Integer>) ois.readObject();
+		        this.inverseFileIDDictionary = (HashMap<Integer, String>) ois.readObject();
+		        
 		        
 		        ois.close();
 			} catch (IOException e)
@@ -142,7 +156,7 @@ public class IndexReader {
 	 */
 	public int getTotalKeyTerms() {
 		//TODO : YOU MUST IMPLEMENT THIS
-		return Index.size();
+		return this.Dictionary.size();
 	}
 	
 	/**
@@ -152,7 +166,7 @@ public class IndexReader {
 	 */
 	public int getTotalValueTerms() {
 		//TODO: YOU MUST IMPLEMENT THIS
-		return -1;
+		return this.fileIDDictionary.size();
 	}
 	
 	/**
@@ -165,7 +179,40 @@ public class IndexReader {
 	 */
 	public Map<String, Integer> getPostings(String term) {
 		//TODO:YOU MUST IMPLEMENT THIS
-		return null;
+		// get the id from the dictionary for the term
+		// then get the postings for the term and save them into a hashmap
+		// that contains (fileID: noOfOccurences
+		
+		LinkedList<Postings> postingsList = new LinkedList<Postings>();
+		HashMap<String, Integer> postings = new HashMap<String, Integer>();
+		int termID;
+		String fileID;
+		int fileIDCompressed;
+		int occurences;
+		
+		if (this.Dictionary.containsKey(term))
+		{
+			termID = this.Dictionary.get(term);
+			postingsList = this.Index.get(termID);
+			for (Postings post:postingsList)
+			{
+				// get the compressed file ID of the file
+				fileIDCompressed = post.getFileID();
+				occurences = post.getOccurences();
+				// get the main file ID
+				fileID = this.inverseFileIDDictionary.get(fileIDCompressed);
+				postings.put(fileID, occurences);
+			}
+			return postings;
+		}
+		else
+		{
+			return null;
+		}
+		
+		
+		
+		
 	}
 	
 	/**
@@ -177,7 +224,30 @@ public class IndexReader {
 	 */
 	public List<String> getTopK(int k) {
 		//TODO YOU MUST IMPLEMENT THIS
-		return null;
+		// junk k value , return null
+		ArrayList<String> topKList = new ArrayList<String>();
+		if (k <= 0)
+		{	
+			return null;	
+		}
+		else {
+			QueryValueComparator compPattern = new QueryValueComparator(this.kTermIndex);
+			TreeMap<String, Integer> topKTree = new TreeMap<String, Integer>(compPattern);
+			topKTree.putAll(this.kTermIndex);
+
+			int i = 1;
+			for (Entry<String, Integer> etr : topKTree.entrySet()) 
+			{
+				if (i > k)	break;
+				else 
+				{
+					topKList.add(etr.getKey());
+					i++;
+				}
+			}
+			return topKList;
+		}
+		
 	}
 	
 	/**
@@ -194,4 +264,24 @@ public class IndexReader {
 		//TODO : BONUS ONLY
 		return null;
 	}
+	
+	
+	class QueryValueComparator implements Comparator<String> {
+		
+	    Map<String, Integer> base;
+	    public QueryValueComparator(Map<String, Integer> map) {
+	        this.base = map;
+	    }
+
+	       
+	    public int compare(String a, String b) {
+	        Integer x = base.get(a);
+	        Integer y = base.get(b);
+	        if (x.equals(y)) {
+	            return b.compareTo(a);
+	        }
+	        return y.compareTo(x);
+	    }
+    }
+	
 }

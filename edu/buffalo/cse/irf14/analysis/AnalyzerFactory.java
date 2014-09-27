@@ -54,6 +54,90 @@ public class AnalyzerFactory {
 		
 		// need the class DoNothing class to return an Analyzer class which does nothing when 
 		// the increment() method is called
+		try
+		{
+			
+		if (name == FieldNames.CONTENT | name == FieldNames.TITLE)
+		{
+			TokenFilterFactory factory = TokenFilterFactory.getInstance();
+
+			
+			// thru ACCENTS FILTER
+			TokenFilter filter = factory.getFilterByType(TokenFilterType.ACCENT, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}
+			stream.reset();
+			
+			
+			// THRU DATES FILTER
+			filter = factory.getFilterByType(TokenFilterType.DATE, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}			
+			stream.reset();
+			
+			
+			// THRU SYMBOL FILTER
+			filter = factory.getFilterByType(TokenFilterType.SYMBOL, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}
+			stream.reset();
+			
+			// THRU CAPITALIZATION FILTER
+			filter = factory.getFilterByType(TokenFilterType.CAPITALIZATION, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}
+			stream.reset();
+			
+			// THRU SPECIAL CHARS FILTER
+			filter = factory.getFilterByType(TokenFilterType.SPECIALCHARS, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}
+			stream.reset();
+			
+			// THRU NUMBERS FILTER
+			filter = factory.getFilterByType(TokenFilterType.NUMERIC, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}
+			stream.reset();			
+			
+			// THRU STEMMER FILTER
+			filter = factory.getFilterByType(TokenFilterType.STEMMER, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}
+			stream.reset();			
+			
+			// THRU STOPWORDS FILTER
+			filter = factory.getFilterByType(TokenFilterType.STOPWORD, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}
+			stream.reset();			
+			
+			
+			
+			
+		}
+		
+		} catch (TokenizerException e)
+		{
+			e.printStackTrace();
+		}
+		
 		DoNothing d = new DoNothing(stream);
 		
 		return d;

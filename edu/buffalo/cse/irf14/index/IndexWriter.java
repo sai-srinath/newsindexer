@@ -36,6 +36,7 @@ public class IndexWriter extends Token implements Serializable{
 	
 	// Declaring the various lookup dictionaries needed for indexing process
 	private HashMap<String, Integer> fileIDDictionary;
+	private HashMap<Integer, String> inverseFileIDDictionary;
 	private HashMap<String, Integer> termDictionary;
 	private HashMap<String, Integer> categoryDictionary;
 	private HashMap<String, Integer> placeDictionary;
@@ -97,6 +98,7 @@ public class IndexWriter extends Token implements Serializable{
 		this.indexDirectory = indexDir;
 		
 		// Allocating memory on the heap for the Dictionaries
+		inverseFileIDDictionary = new HashMap<Integer, String>();
 		fileIDDictionary = new HashMap<String, Integer>();
 		termDictionary = new HashMap<String, Integer>();
 		categoryDictionary = new HashMap<String, Integer>();
@@ -133,79 +135,98 @@ public class IndexWriter extends Token implements Serializable{
 		// Getting the fileID and category of the file and storing these entries into 
 		// respective dictionaries - fileIDDictionary and categoryDictionary
 		
-		fileID = d.getField(FieldNames.FILEID)[0];
-		categoryFile = d.getField(FieldNames.CATEGORY)[0];
 		
+		fileID = d.getField(FieldNames.FILEID)[0];
+		
+		
+		// store the new fileID : compressedfileID mapping into the dictionaries
 		this.fileIDDictionary.put(fileID, this.fileIDAssigner);
+		this.inverseFileIDDictionary.put(this.fileIDAssigner, fileID);
 		this.fileIDAssigner++;
 		
 		int idCat;
-		
-		if (categoryDictionary.containsKey(categoryFile))
-		{
-			idCat = this.categoryDictionary.get(categoryFile);
-		}
-		else
-		{
-			idCat = this.categoryIDAssigner;
-			this.categoryDictionary.put(categoryFile, idCat);
-			this.categoryIDAssigner++;
-		}
-	
 		
 		// putting the category id : postings into the category index
 		
 		int idFile = fileIDDictionary.get(fileID);
 		
-		// if the category is already in the category index, then add the new file to the keys
-		// equivalent postings list
-		if (this.categoryIndex.containsKey(idCat))
-		{
-			
-			postingsListCategory = this.categoryIndex.get(idCat);
-			postingsListCategory.add(new Postings(idFile));
-			this.categoryIndex.put(idCat, postingsListCategory);
-			
-		}
-		else
+		if (d.getField(FieldNames.CATEGORY) != null)
 		{	
-			postingsListCategory = new LinkedList<Postings>();
-			Postings element = new Postings(idFile);
-			postingsListCategory.add(element);
-			this.categoryIndex.put(idCat, postingsListCategory);
+			System.out.println("inside category");
+			categoryFile = d.getField(FieldNames.CATEGORY)[0];
+		// if the category is already present, get the category ID
+			if (categoryDictionary.containsKey(categoryFile))
+			{
+				idCat = this.categoryDictionary.get(categoryFile);
+			}
+			else // assign a new ID for the category and store into dictionary
+			{
+				idCat = this.categoryIDAssigner;
+				this.categoryDictionary.put(categoryFile, idCat);
+				this.categoryIDAssigner++;
+			}
+		
+			
+	
+			
+			// if the category is already in the category index, then add the new file to the keys
+			// equivalent postings list
+			if (this.categoryIndex.containsKey(idCat))
+			{
+				
+				postingsListCategory = this.categoryIndex.get(idCat);
+				postingsListCategory.add(new Postings(idFile));
+				this.categoryIndex.put(idCat, postingsListCategory);
+				
+			}
+			else
+			{	
+				System.out.println("category added");
+				postingsListCategory = new LinkedList<Postings>();
+				Postings element = new Postings(idFile);
+				postingsListCategory.add(element);
+				this.categoryIndex.put(idCat, postingsListCategory);
+			}
 		}
+		
 		
 		// DONE with the category index, now moving on to indexing TITLE, CONTENT, AUTHORORG 
 		// together into the term index for the given DOCUMENT
 		
 		if (d.getField(FieldNames.TITLE) != null)
 		{
-			analyzeField(FieldNames.TITLE, d.getField(FieldNames.TITLE)[0], idFile);	
+			analyzeField(FieldNames.TITLE, d.getField(FieldNames.TITLE)[0], idFile);
+			System.out.println("done title");
 		}
 		
 		if (d.getField(FieldNames.CONTENT) != null)
 		{
-			analyzeField(FieldNames.CONTENT, d.getField(FieldNames.CONTENT)[0], idFile);	
+			analyzeField(FieldNames.CONTENT, d.getField(FieldNames.CONTENT)[0], idFile);
+			System.out.println("done content");
 		}
 		
 		if (d.getField(FieldNames.PLACE) != null)
 		{
-			analyzeField(FieldNames.PLACE, d.getField(FieldNames.PLACE)[0], idFile);	
+			analyzeField(FieldNames.PLACE, d.getField(FieldNames.PLACE)[0], idFile);
+			System.out.println("done place");
 		}
 		
 		if (d.getField(FieldNames.NEWSDATE) != null)
 		{
-			analyzeField(FieldNames.NEWSDATE, d.getField(FieldNames.NEWSDATE)[0], idFile);	
+			analyzeField(FieldNames.NEWSDATE, d.getField(FieldNames.NEWSDATE)[0], idFile);
+			System.out.println("done newsdate");
 		}
 		
 		if (d.getField(FieldNames.AUTHORORG) != null)
 		{
-			analyzeField(FieldNames.AUTHORORG, d.getField(FieldNames.AUTHORORG)[0], idFile);	
+			analyzeField(FieldNames.AUTHORORG, d.getField(FieldNames.AUTHORORG)[0], idFile);
+			System.out.println("done authororg");
 		}
 		
 		if (d.getField(FieldNames.AUTHOR) != null)
 		{
-			analyzeField(FieldNames.AUTHOR, d.getField(FieldNames.AUTHOR), idFile);	
+			analyzeField(FieldNames.AUTHOR, d.getField(FieldNames.AUTHOR), idFile);
+			System.out.println("done author");
 		}
 		
 		
@@ -224,39 +245,47 @@ public class IndexWriter extends Token implements Serializable{
 		
 		//TODO
 		try{
+			// writing term index and dictionary to file
 			FileOutputStream fos = new FileOutputStream(this.indexDirectory+File.separator+"termIndex.ser");
-			System.out.println("loop entered");
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 	        oos.writeObject(this.termIndex);
 	        oos.writeObject(this.termDictionary);
 	        fos.close();
 	        
+	        
+	        // writing author index and dictionary to file
 	        fos = new FileOutputStream(this.indexDirectory+File.separator+"authorIndex.ser");
 	        oos = new ObjectOutputStream(fos);
 	        oos.writeObject(this.authorIndex);
 	        oos.writeObject(this.authorDictionary);
 	        fos.close();
 	        
+	        // writing place index and dictionary to file
 	        fos = new FileOutputStream(this.indexDirectory+File.separator+"placeIndex.ser");
 	        oos = new ObjectOutputStream(fos);
 	        oos.writeObject(this.placeIndex);
 	        oos.writeObject(this.placeDictionary);
 	        fos.close();
 	        
+	        // writing category index and dictionary to file
 	        fos = new FileOutputStream(this.indexDirectory+File.separator+"categoryIndex.ser");
 	        oos = new ObjectOutputStream(fos);
 	        oos.writeObject(this.categoryIndex);
 	        oos.writeObject(this.categoryDictionary);
 	        fos.close();
 	        
+	        // writing KTermMap to file
 	        fos = new FileOutputStream(this.indexDirectory+File.separator+"kTermMap.ser");
 	        oos = new ObjectOutputStream(fos);
 	        oos.writeObject(this.kTermMap);
 	        fos.close();
 	        
+	        
+	        // writing fileIDDictionary to file
 	        fos = new FileOutputStream(this.indexDirectory+File.separator+"fileIDDict.ser");
 	        oos = new ObjectOutputStream(fos);
 	        oos.writeObject(this.fileIDDictionary);
+	        oos.writeObject(this.inverseFileIDDictionary);
 	        fos.close();
 	        
 	        System.out.println("All writes done!!");
@@ -283,29 +312,29 @@ public class IndexWriter extends Token implements Serializable{
 		
 		
 
-		if(fn == FieldNames.TITLE || fn == FieldNames.CONTENT || fn == FieldNames.NEWSDATE
-				|| fn == FieldNames.AUTHORORG) {
+		if (fn == FieldNames.TITLE || fn == FieldNames.CONTENT
+				|| fn == FieldNames.NEWSDATE || fn == FieldNames.AUTHORORG) {
 			try {
 				// create a new token stream with the given content
 				Tokenizer tkizer = new Tokenizer();
 				TokenStream tstream = tkizer.consume(content);
 				sameStream = false;
-
-				/*
-				 * AnalyzerFactory a = AnalyzerFactory.getInstance();
-				 * Analyzer anal;
-				 * anal = a.getAnalyzerForField(fn, tstream); 
-				 * tstream = anal.getStream();
-				 */
 				
-				// iterate through the processed tokens and start the indexing process
+
+				AnalyzerFactory a = AnalyzerFactory.getInstance();
+				Analyzer anal;
+				anal = a.getAnalyzerForField(fn, tstream);
+				tstream = anal.getStream();
+
+				// iterate through the processed tokens and start the indexing
+				// process
 				tstream.reset();
 				while (tstream.hasNext()) {
 					t = tstream.next();
 					tokenText = t.getTermText();
 
 					int tokenNo;
-					// create a mapping in the term dictionary
+					// create a mapping in the term dictionary , if it already exists get the mapping
 					if (this.termDictionary.containsKey(tokenText)) {
 						tokenNo = this.termDictionary.get(tokenText);
 
@@ -314,16 +343,13 @@ public class IndexWriter extends Token implements Serializable{
 						tokenNo = this.termIDAssigner;
 						this.termIDAssigner++;
 					}
-					
+
 					// code to store term into kTermMap as (Term : Occurences)
-					if (kTermMap.containsKey(tokenText))
-					{
+					if (kTermMap.containsKey(tokenText)) {	// if term already present, increment the value
 						int valueOccur = kTermMap.get(tokenText);
 						valueOccur++;
 						kTermMap.put(tokenText, valueOccur);
-					}
-					else
-					{
+					} else {  // set new term and map it to (term : 1)
 						kTermMap.put(tokenText, 1);
 					}
 
@@ -372,11 +398,11 @@ public class IndexWriter extends Token implements Serializable{
 				Tokenizer tkizer = new Tokenizer();
 				TokenStream tstream = tkizer.consume(content);
 				sameStream = false;
-				/*
-				 * AnalyzerFactory a = AnalyzerFactory.getInstance(); Analyzer
-				 * anal; anal = a.getAnalyzerForField(fn, tstream); tstream =
-				 * anal.getStream();
-				 */
+				
+				AnalyzerFactory a = AnalyzerFactory.getInstance();
+				Analyzer anal;
+				anal = a.getAnalyzerForField(fn, tstream);
+				tstream = anal.getStream();
 
 				// iterate through the processed tokens and start the indexing
 				// process
@@ -470,11 +496,11 @@ public class IndexWriter extends Token implements Serializable{
 				Tokenizer tkizer = new Tokenizer();
 				TokenStream tstream = tkizer.consume(content);
 				sameStream = false;
-				/*
-				 * AnalyzerFactory a = AnalyzerFactory.getInstance(); Analyzer
-				 * anal; anal = a.getAnalyzerForField(fn, tstream); tstream =
-				 * anal.getStream();
-				 */
+				
+				AnalyzerFactory a = AnalyzerFactory.getInstance();
+				Analyzer anal;
+				anal = a.getAnalyzerForField(fn, tstream);
+				tstream = anal.getStream();
 
 				// iterate through the processed tokens and start the indexing
 				// process
