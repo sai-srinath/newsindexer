@@ -34,10 +34,7 @@ public class DateRuleTest extends TFRuleBaseTest {
 						runTest(TokenFilterType.DATE, "President Franklin D. Roosevelt "
 								+ "to proclaim December 7, "
 								+ "1941, 'a date which will "
-								+ "live in infamy'")); 
-				
-				
-				
+								+ "live in infamy'"));
 				assertArrayEquals(
 						new String[] { "The", "Academy", "operated",
 								"until", "it", "was", "destroyed", "by",
@@ -46,9 +43,6 @@ public class DateRuleTest extends TFRuleBaseTest {
 						runTest(TokenFilterType.DATE, "The Academy operated until "
 								+ "it was destroyed by Lucius "
 								+ "Cornelius Sulla in 84 BC"));
-				
-			
-				
 				assertArrayEquals(
 						new String[] { "For", "instance,", "the",
 								"19480101", "ABL", "finalist", "Baltimore",
@@ -59,13 +53,10 @@ public class DateRuleTest extends TFRuleBaseTest {
 								+ "finalist Baltimore Bullets "
 								+ "moved to the BAA and won "
 								+ "that league's 1948 title."));
-				
 				assertArrayEquals(
 						new String[] { "It", "was", "now", "about",
 								"10:15:00." },
 						runTest(TokenFilterType.DATE, "It was now about 10:15 am."));
-				
-				
 				assertArrayEquals(
 						new String[] { "Godse", "approached", "Gandhi",
 								"on", "19480130", "during", "the",
@@ -73,13 +64,11 @@ public class DateRuleTest extends TFRuleBaseTest {
 						runTest(TokenFilterType.DATE, "Godse approached Gandhi on "
 								+ "January 30, 1948 during the "
 								+ "evening prayer at 5:15PM."));
-				
 				assertArrayEquals(
 						new String[] { "Pune", "is", "known", "to", "have",
 								"existed", "as", "a", "town", "since",
 								"08470101." },
 						runTest(TokenFilterType.DATE, "Pune is known to have existed as a town since 847AD."));
-				
 				assertArrayEquals(
 						new String[] { "19000411", "is", "the", "101st",
 								"day", "of", "the", "year", "(102nd", "in",
@@ -88,7 +77,7 @@ public class DateRuleTest extends TFRuleBaseTest {
 						runTest(TokenFilterType.DATE, "April 11 is the 101st day "
 								+ "of the year (102nd in "
 								+ "leap years) in the Gregorian "
-								+ "calendar.")); 
+								+ "calendar."));
 				assertArrayEquals(
 						new String[] { "Apple", "is", "one", "of", "the",
 								"world's", "most", "valuable", "publicly",

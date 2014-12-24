@@ -30,7 +30,7 @@ public class TFRuleBaseTest {
 
 		while (tstream.hasNext()) {
 			t = tstream.next();
-			
+
 			if (t != null) {
 				s = t.toString();
 				

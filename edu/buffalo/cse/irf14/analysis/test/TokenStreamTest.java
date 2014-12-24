@@ -254,10 +254,8 @@ public class TokenStreamTest {
 		Token tNext, tCurrent;
 		while(stream.hasNext()) {
 			tNext = stream.next();
-			
 			assertNotNull(tNext);
 			tCurrent = stream.getCurrent();
-			System.out.println(tCurrent.toString());
 			assertNotNull(tCurrent);
 			assertEquals(tNext, tCurrent); //value
 			assertTrue(tNext == tCurrent); //reference

@@ -12,6 +12,23 @@ import java.util.HashMap;
 public class Document {
 	//Sample implementation - you can change this if you like
 	private HashMap<FieldNames, String[]> map;
+	private int docLength = 0;
+	
+	/**
+	 * SETTER method for the document length (set this during the parsing stage itself)
+	 * @param docLength
+	 */
+	public void setDocLength(int docLength){
+		this.docLength = docLength;
+	}
+	
+	/**
+	 * GETTER method for the document length
+	 * @return - the length of the respective document
+	 */
+	public int getDocLength(){
+		return this.docLength;
+	}
 	
 	/**
 	 * Default constructor

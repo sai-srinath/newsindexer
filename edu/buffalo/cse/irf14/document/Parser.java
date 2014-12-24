@@ -38,7 +38,6 @@ public class Parser {
 		if (filename == null){
 			throw new ParserException();
 		}
-		System.out.println("parsing started");
 		
 		// Variable indexPos to track the current pointer location in the String Array
 		int indexPos = 0;
@@ -58,7 +57,6 @@ public class Parser {
 		// System.out.println(filename);
 		// throw an exception if the file is blank, junk or null
 		if (fileCat[0] == null){
-			System.out.println(filename);
 			throw new ParserException();
 		}
 		d.setField(FieldNames.CATEGORY, fileCat[0]);
@@ -105,11 +103,31 @@ public class Parser {
 				news.append(n);
 			}
 			
+			String[] words = news.toString().split("\\s+");
+			d.setDocLength(words.length);
+			
 			
 			// Obtaining the TITLE of the file
 			Object[] titleInfo = new Object[2];
 			
 			titleInfo = regexTITLE("([^a-z]+)\\s{2,}", news.toString());
+			
+			// NEW CODE CHANGE -- REMOVE IF CAUSES PROBLEMS
+			if (titleInfo[0].toString().equals("")  & news.toString().toLowerCase().contains("blah blah"))
+			{	
+				Pattern checkRegex = Pattern.compile("[^a-z]+");
+		    	Matcher regexMatcher = checkRegex.matcher(news.toString());
+		    	//System.out.println(news.toString());
+		    	if (regexMatcher.find() == true)
+		    	{
+		    		titleInfo[0] = regexMatcher.group(); 
+		    		titleInfo[1] = regexMatcher.end();
+		    		//System.out.println(titleInfo[0].toString());
+		    	}
+		    	
+			}
+			
+	    	
 			d.setField(FieldNames.TITLE, titleInfo[0].toString().trim());
 			indexPos = (Integer) titleInfo[1];
 			
@@ -120,12 +138,26 @@ public class Parser {
 			
 			
 			// Getting the Author and Author Org
+			String[] authorList;
 			resultAuthor = regexAuthor("<AUTHOR>(.*)</AUTHOR>", news.toString());
 			
+			
 			if (resultAuthor[0] != null)
-			{
-				d.setField(FieldNames.AUTHOR, resultAuthor[0].toString());
+			{	
+				if(resultAuthor[0].toString().toLowerCase().contains(" and "))
+				{	
+					
+					authorList = resultAuthor[0].toString().split("(?i)\\sand\\s");
+					d.setField(FieldNames.AUTHOR, authorList);
+				}
+				else
+				{	
+					
+					d.setField(FieldNames.AUTHOR, resultAuthor[0].toString());
+				}
+				
 			}
+			
 			
 			if (resultAuthor[1] != null)
 			{
@@ -142,8 +174,18 @@ public class Parser {
 		    
 		    
 		    // Getting the Place and Date
- 			resultPlaceDate = regexPlaceDate("\\s{2,}(.+),\\s(?:([A-Z][a-z]+\\s[0-9]{1,})\\s{1,}-)", news.toString());
+ 			//resultPlaceDate = regexPlaceDate("\\s{2,}(.+),\\s(?:([A-Z][a-z]+\\s[0-9]{1,})\\s{1,}-)", news.toString());
+		    
+		    resultPlaceDate = regexPlaceDate("\\s{2,}(.+),\\s{1,}(?:((?i)(jan|january|feb|february|mar|march|apr|april|may|june|july|aug|august|sep|september|oct|october|nov|november|dec|december)\\s{1,}[0-9]{1,})\\s{1,}-)", news.toString());
  			
+ 			
+ 				
+ 			
+ 				
+ 				
+ 			// end of test code
+ 				
+ 				
  			if (resultPlaceDate[0] != null)
  			{
  				d.setField(FieldNames.PLACE, resultPlaceDate[0].toString().trim());
@@ -161,9 +203,14 @@ public class Parser {
 		    	indexPos = (Integer) resultPlaceDate[2];
 		    }
  		    
- 		    
+ 		    if (indexPos >= news.length() - 1)
+ 		    {
+ 		    	// defensive programming
+ 		    }
+ 		    else
+ 		    {
  		    d.setField(FieldNames.CONTENT, news.substring(indexPos + 1));
- 		    
+ 		    }
  		    return d;
  		    
 		    
@@ -172,20 +219,15 @@ public class Parser {
 			
 		}
 		catch(FileNotFoundException e){
-			System.out.println("File not found");
 			throw new ParserException();
 			
 		}
 
 		catch(IOException e){
-			System.out.println("An I/O Error Occured");
 			throw new ParserException();
 		}
 		
 		catch(Exception e){
-			System.out.println(indexPos);
-			System.out.println(news.toString());
-			System.out.println(filename);
 			e.printStackTrace();
 			
 		}
@@ -254,7 +296,6 @@ public class Parser {
     		}
     		
     	}
-    	System.out.println(Arrays.toString(fileCatReturn));
     	return fileCatReturn;
 	}
 	
@@ -284,6 +325,7 @@ public class Parser {
 					authorData[0] = regexMatcher.group(1);
 				}
 	    		authorInfo[2] = regexMatcher.end();
+	    		
 	    	
 	    		authorInfo[0] = authorData[0].replaceFirst("(?i)by","").trim();
 	    		authorInfo[1] = authorData[1];

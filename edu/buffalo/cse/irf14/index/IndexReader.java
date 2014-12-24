@@ -5,6 +5,7 @@ package edu.buffalo.cse.irf14.index;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -13,7 +14,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-import edu.buffalo.cse.irf14.index.IndexWriter.Postings;
+
 
 /**
  * @author nikhillo
@@ -30,9 +31,10 @@ public class IndexReader {
 	// HashMaps that get the index as well as Top K terms from disk
 	private HashMap<Integer, LinkedList<Postings>> Index;
 	private HashMap<String, Integer> Dictionary;
-	private HashMap<String, Integer> kTermIndex;
+	private HashMap<String, Integer> kIndex;
 	private HashMap<String, Integer> fileIDDictionary;
 	private HashMap<Integer, String> inverseFileIDDictionary;
+	private HashMap<Integer, Integer> docLengthDictionary;
 	
 	public IndexReader(String indexDir, IndexType type) {
 		//TODO
@@ -46,11 +48,14 @@ public class IndexReader {
 		        ObjectInputStream ois = new ObjectInputStream(fis);
 		        Index = (HashMap<Integer, LinkedList<Postings>>) ois.readObject();
 		        Dictionary = (HashMap<String, Integer>) ois.readObject();
+		        this.kIndex = (HashMap<String, Integer>) ois.readObject();
 		        
 		        fis = new FileInputStream(indexDir + File.separator + "fileIDDict.ser");
 		        ois = new ObjectInputStream(fis);
 		        fileIDDictionary = (HashMap<String, Integer>) ois.readObject();
 		        this.inverseFileIDDictionary = (HashMap<Integer, String>) ois.readObject();
+		        this.docLengthDictionary = (HashMap<Integer, Integer>) ois.readObject();
+		        
 		        
 		        ois.close();
 			} catch (IOException e)
@@ -72,15 +77,16 @@ public class IndexReader {
 		        ObjectInputStream ois = new ObjectInputStream(fis);
 		        Index = (HashMap<Integer, LinkedList<Postings>>) ois.readObject();
 		        Dictionary = (HashMap<String, Integer>) ois.readObject();
+		        this.kIndex = (HashMap<String, Integer>) ois.readObject();
 		        
 		        fis = new FileInputStream(indexDir + File.separator + "fileIDDict.ser");
 		        ois = new ObjectInputStream(fis);
 		        fileIDDictionary = (HashMap<String, Integer>) ois.readObject();
 		        this.inverseFileIDDictionary = (HashMap<Integer, String>) ois.readObject();
+		        this.docLengthDictionary = (HashMap<Integer, Integer>) ois.readObject();
 		        
-		        fis = new FileInputStream(indexDir + File.separator + "kTermMap.ser");
-		        ois = new ObjectInputStream(fis);
-		        this.kTermIndex = (HashMap<String, Integer>) ois.readObject();
+		        
+		        
 		        
 		        
 		        ois.close();
@@ -103,11 +109,13 @@ public class IndexReader {
 		        ObjectInputStream ois = new ObjectInputStream(fis);
 		        Index = (HashMap<Integer, LinkedList<Postings>>) ois.readObject();
 		        Dictionary = (HashMap<String, Integer>) ois.readObject();
+		        this.kIndex = (HashMap<String, Integer>) ois.readObject();
 		        
 		        fis = new FileInputStream(indexDir + File.separator + "fileIDDict.ser");
 		        ois = new ObjectInputStream(fis);
 		        fileIDDictionary = (HashMap<String, Integer>) ois.readObject();
 		        this.inverseFileIDDictionary = (HashMap<Integer, String>) ois.readObject();
+		        this.docLengthDictionary = (HashMap<Integer, Integer>) ois.readObject();
 		        
 		        ois.close();
 			} catch (IOException e)
@@ -129,11 +137,13 @@ public class IndexReader {
 		        ObjectInputStream ois = new ObjectInputStream(fis);
 		        Index = (HashMap<Integer, LinkedList<Postings>>) ois.readObject();
 		        Dictionary = (HashMap<String, Integer>) ois.readObject();
+		        this.kIndex = (HashMap<String, Integer>) ois.readObject();
 		        
 		        fis = new FileInputStream(indexDir + File.separator + "fileIDDict.ser");
 		        ois = new ObjectInputStream(fis);
 		        fileIDDictionary = (HashMap<String, Integer>) ois.readObject();
 		        this.inverseFileIDDictionary = (HashMap<Integer, String>) ois.readObject();
+		        this.docLengthDictionary = (HashMap<Integer, Integer>) ois.readObject();
 		        
 		        
 		        ois.close();
@@ -231,9 +241,9 @@ public class IndexReader {
 			return null;	
 		}
 		else {
-			QueryValueComparator compPattern = new QueryValueComparator(this.kTermIndex);
+			QueryValueComparator compPattern = new QueryValueComparator(this.kIndex);
 			TreeMap<String, Integer> topKTree = new TreeMap<String, Integer>(compPattern);
-			topKTree.putAll(this.kTermIndex);
+			topKTree.putAll(this.kIndex);
 
 			int i = 1;
 			for (Entry<String, Integer> etr : topKTree.entrySet()) 
@@ -262,7 +272,120 @@ public class IndexReader {
 	 */
 	public Map<String, Integer> query(String...terms) {
 		//TODO : BONUS ONLY
-		return null;
+		// first check if all the terms are in the dictionary, else return null 
+		ArrayList<LinkedList<Postings>> arrayOfTerms = new ArrayList<LinkedList<Postings>>();
+		LinkedList<Postings> postingsList = new LinkedList<Postings>();
+		LinkedList<Postings> toConvertMap ;
+		LinkedList<Postings> elementToCompare;
+		LinkedList<Postings> tempMap;
+		Postings tempPostings;
+		
+		HashMap<String, Integer> mapToReturn = new HashMap<String, Integer>();
+		int termID;
+		int fileIDCompressed;
+		int occurences;
+		String fileID;
+		
+		
+		
+		
+		System.out.println(Arrays.toString(terms));
+		// checking if all the terms are in the index, else return null
+		for (String term:terms)
+		{
+			if(Dictionary.containsKey(term))
+			{
+				
+				continue;
+				
+			}
+			else
+			{
+				return null;
+			}
+		}
+		
+		// retrieve the postings list for all of the terms and store them in a array list
+		for (String term:terms)
+		{
+			termID = this.Dictionary.get(term);
+			postingsList = this.Index.get(termID);
+			arrayOfTerms.add(postingsList);
+		}
+		
+		// if array is of only 1 term, then return its postings list
+		if (arrayOfTerms.size() == 1)
+		{
+			for (Postings p:postingsList)
+			{	
+				fileIDCompressed = p.getFileID();
+				occurences = p.getOccurences();
+				// get the main file ID
+				fileID = this.inverseFileIDDictionary.get(fileIDCompressed);
+				mapToReturn.put(fileID, occurences);
+			}
+			return mapToReturn;
+		}
+		else // more than one term exists in and query
+		{	
+			// retrieve first elements postings list
+			toConvertMap = arrayOfTerms.get(0);
+			int sumOfOccurences = 0;
+			
+			for (int i=1; i<arrayOfTerms.size(); i++)
+			{	
+				
+				elementToCompare = arrayOfTerms.get(i);
+				
+				
+				
+				tempMap = new LinkedList<Postings>();
+				
+				for (Postings xyz:elementToCompare)
+				{
+					for (Postings temp:toConvertMap)
+					{
+						if (temp.getFileID() == xyz.getFileID())
+						{	
+							sumOfOccurences = temp.getOccurences() + xyz.getOccurences();
+							tempPostings = temp;
+							tempPostings.setOccurences(sumOfOccurences);
+							System.out.println(sumOfOccurences);
+							tempMap.add(tempPostings);
+							break;
+						}
+					}
+					
+				}
+				if (tempMap.size() == 0)
+				{
+					return null;
+				}
+				else
+				{
+					toConvertMap = tempMap;
+					
+				}
+				
+			}
+			
+			
+			
+			for (Postings p:toConvertMap)
+			{
+				fileID = this.inverseFileIDDictionary.get(p.getFileID());
+				occurences = p.getOccurences();
+				mapToReturn.put(fileID, occurences);
+			}
+			
+			return mapToReturn;
+		}
+		
+		
+		
+		
+		
+
 	}
 	
 	
@@ -284,4 +407,58 @@ public class IndexReader {
 	    }
     }
 	
+	/**
+	 * Method gets you the file document length
+	 * FOR TESTING PURPOSE ONLY
+	 * @param fileID - ID of the file (7 digit number)
+	 * @return
+	 */
+	public int getDocLength(String fileID){
+		
+		int mappedID = this.fileIDDictionary.get(fileID);
+		return this.docLengthDictionary.get(mappedID);
+		
+	}
+	
+	/**
+	 * Method that gets you the postings list and the positions of the terms
+	 */
+	public void getPostingsTF(String term) {
+		//TODO:YOU MUST IMPLEMENT THIS
+		// get the id from the dictionary for the term
+		// then get the postings for the term and save them into a hashmap
+		// that contains (fileID: noOfOccurences
+		
+		LinkedList<Postings> postingsList = new LinkedList<Postings>();
+		HashMap<String, ArrayList<Integer>> postings = new HashMap<String, ArrayList<Integer>>();
+		int termID;
+		String fileID;
+		int fileIDCompressed;
+		HashMap<String, ArrayList<Integer>> termPositions;
+		ArrayList<Integer> tempList;
+		
+		if (this.Dictionary.containsKey(term))
+		{
+			termID = this.Dictionary.get(term);
+			postingsList = this.Index.get(termID);
+			for (Postings post:postingsList)
+			{
+				// get the compressed file ID of the file
+				fileIDCompressed = post.getFileID();
+				termPositions = post.getTfMap();
+				// get the main file ID
+				fileID = this.inverseFileIDDictionary.get(fileIDCompressed);
+				System.out.println(fileID);
+				for (String key: termPositions.keySet()){
+					tempList = termPositions.get(key);
+					for (int temp:tempList){
+						System.out.println(temp);
+					}
+				}
+			}
+			
+		}
+		
+		
+	}
 }

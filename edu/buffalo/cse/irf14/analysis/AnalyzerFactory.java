@@ -56,27 +56,19 @@ public class AnalyzerFactory {
 		// the increment() method is called
 		try
 		{
-			
+			TokenFilterFactory factory = TokenFilterFactory.getInstance();
+			TokenFilter filter;
 		if (name == FieldNames.CONTENT | name == FieldNames.TITLE)
 		{
-			TokenFilterFactory factory = TokenFilterFactory.getInstance();
+			
 
 			
 			// thru ACCENTS FILTER
-			TokenFilter filter = factory.getFilterByType(TokenFilterType.ACCENT, stream);
+			filter = factory.getFilterByType(TokenFilterType.ACCENT, stream);
 			
 			while (filter.increment()) {
 				//Do nothing :/
 			}
-			stream.reset();
-			
-			
-			// THRU DATES FILTER
-			filter = factory.getFilterByType(TokenFilterType.DATE, stream);
-			
-			while (filter.increment()) {
-				//Do nothing :/
-			}			
 			stream.reset();
 			
 			
@@ -104,6 +96,25 @@ public class AnalyzerFactory {
 			}
 			stream.reset();
 			
+			
+			
+			
+			// THRU DATES FILTER
+			filter = factory.getFilterByType(TokenFilterType.DATE, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}			
+			stream.reset();
+			
+			// THRU STOPWORDS FILTER
+			filter = factory.getFilterByType(TokenFilterType.STOPWORD, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}
+			stream.reset();
+			
 			// THRU NUMBERS FILTER
 			filter = factory.getFilterByType(TokenFilterType.NUMERIC, stream);
 			
@@ -120,18 +131,62 @@ public class AnalyzerFactory {
 			}
 			stream.reset();			
 			
-			// THRU STOPWORDS FILTER
-			filter = factory.getFilterByType(TokenFilterType.STOPWORD, stream);
-			
-			while (filter.increment()) {
-				//Do nothing :/
-			}
-			stream.reset();			
+						
 			
 			
 			
 			
 		}
+		
+		if (name == FieldNames.NEWSDATE)
+		{
+			// thru dates filter
+			filter = factory.getFilterByType(TokenFilterType.DATE, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}			
+			stream.reset();
+		}
+		
+		if (name == FieldNames.AUTHOR)
+		{
+			// thru dates filter
+			filter = factory.getFilterByType(TokenFilterType.CAPITALIZATION, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}			
+			stream.reset();
+		}
+		
+		if (name == FieldNames.PLACE)
+		{
+			filter = factory.getFilterByType(TokenFilterType.SPECIALCHARS, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}			
+			stream.reset();
+			
+			filter = factory.getFilterByType(TokenFilterType.SYMBOL, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}			
+			stream.reset();
+			
+			
+			filter = factory.getFilterByType(TokenFilterType.CAPITALIZATION, stream);
+			
+			while (filter.increment()) {
+				//Do nothing :/
+			}			
+			stream.reset();
+
+		}
+		
+		
 		
 		} catch (TokenizerException e)
 		{
